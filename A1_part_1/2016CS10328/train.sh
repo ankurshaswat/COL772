@@ -1,1 +1,2 @@
-python train.py $1 $2 $3
+#!/bin/sh
+python3 train.py $1 $2 $3

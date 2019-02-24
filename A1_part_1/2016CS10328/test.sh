@@ -1,1 +1,2 @@
-python test.py $1 $2 $3
+#!/bin/sh
+python3 test.py $1 $2 $3

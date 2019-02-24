@@ -4,9 +4,9 @@ import re
 
 # import numpy as np
 # from sklearn.metrics import accuracy_score,f1_score,mean_squared_error,confusion_matrix
-
+# from nltk.stem.snowball import SnowballStemmer
 from nltk import wordpunct_tokenize
-
+# stemmer = SnowballStemmer("english", ignore_stopwords=True)
 translator = str.maketrans("","", string.punctuation)
 
 # def get_metrics_from_pred(y_pred,y_true):
@@ -51,16 +51,16 @@ def remove_repeats(sentence):
     return pattern.sub(r"\1\1", sentence)
 
 def tokenizer1(sentence):
-    sentence = sentence.translate(translator)      # Remove punctuations
-    sentence = sentence.lower()                    # Convert to lowercase
-    sentence = re.sub(r'\d+', '', sentence)        # Remove Numbers
+    # sentence = sentence.translate(translator)      # Remove punctuations
+    # sentence = sentence.lower()                    # Convert to lowercase
+    #sentence = re.sub(r'\d+', '', sentence)        # Remove Numbers
     sentence = remove_repeats(sentence)            # Remove repeated characters
 #     sentence = sentence.strip()                    # Remove Whitespaces
     tokens = wordpunct_tokenize(sentence)          # Tokenize
 #     tokens = word_tokenize(sentence)          # Tokenize
     
-#     for i in range(len(tokens)):                    # Stem word
-#         tokens[i] = stemmer.stem(tokens[i])
+    # for i in range(len(tokens)):                    # Stem word
+        # tokens[i] = stemmer.stem(tokens[i])
     return tokens
 
 def predict(model_123_45,model_4_5,model_12_3,model_1_2,X_counts):
