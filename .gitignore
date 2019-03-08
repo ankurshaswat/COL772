@@ -104,3 +104,7 @@ venv.bak/
 .mypy_cache/
 
 A1_part_1/data
+A2/GoogleNews-vectors-negative300.bin
+A2/dataset
+*.pkl
+*.pt
