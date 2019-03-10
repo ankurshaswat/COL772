@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 
 window_size = 2
@@ -17,5 +18,6 @@ class Net(nn.Module):
 
     def forward(self, x):
         x = self.embed1(x)
+        x = torch.sum(x, dim=1)
         x = self.linear1(x)
         return x
