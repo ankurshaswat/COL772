@@ -108,3 +108,4 @@ A2/GoogleNews-vectors-negative300.bin
 A2/dataset
 *.pkl
 *.pt
+A2/test_dataset

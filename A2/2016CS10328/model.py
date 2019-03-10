@@ -1,5 +1,7 @@
 import torch.nn as nn
 
+window_size = 2
+
 class Net(nn.Module):
     def __init__(self,vocab_size,embedding_dimension):
         super(Net, self).__init__()
