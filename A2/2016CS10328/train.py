@@ -1,12 +1,8 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
 import torch
 import gensim
 import pickle
 import sys
+import time
 
 import numpy as np
 import torch.nn as nn
@@ -22,13 +18,18 @@ from torch.autograd import Variable
 DEBUG = True
 DEBUG_ITERS = 100
 
-pickle_file_name = 'wordIndexes.pkl'
-model_name = 'model.pt'
+
 dataset_path = sys.argv[1]
-embeddings_path = '../GoogleNews-vectors-negative300.bin'
+
+pickle_file_name = sys.argv[2] + '/wordIndexes.pkl'
+model_name = sys.argv[2] + '/model.pt'
+
+embeddings_path = sys.argv[3]
+# evaluation_file_path = sys.argv[4]
+
 embedding_dimension = 300
 vocab_size = 0
-epochs = 2
+epochs = 50
 batch_size = 256
 counts = {}
 
@@ -84,12 +85,20 @@ def load():
             else:
                 counts[word2idx[token]] += 1
 
-    for token in ['-PADDING-','-UNK-']:
+    # log('Adding google vocab tokens')
+    # for token in model.vocab:
+    #     if (token not in word2idx):
+    #         word2idx[token] = idx
+    #         idx2word[idx] = token
+    #         counts[idx] = 0
+    #         idx += 1
+
+    for token in ['-PADDING-', '-UNK-']:
         word2idx[token] = idx
         idx2word[idx] = token
         counts[idx] = 1
         idx += 1
-    
+
     vocab_size = idx
 
     log('Copying old embeddings')
@@ -142,7 +151,7 @@ db['idx2word'] = idx2word
 db['embedding_dimension'] = embedding_dimension
 db['vocab_size'] = vocab_size
 
-dbfile = open(pickle_file_name , 'wb')
+dbfile = open(pickle_file_name, 'wb')
 
 pickle.dump(db, dbfile)
 dbfile.close()
@@ -151,46 +160,56 @@ log(str(len(train_examples)) + ' training examples in one epoch')
 
 torch.save(model.state_dict(), model_name)
 
-log('Training')
-for epoch in range(epochs):
+# log('Training')
 
-    total_loss = 0.0
+# start_epoch = time.time()
 
-    iter_num = 0
+# for epoch in range(epochs):
 
-    for i in range(0, len(target_words), batch_size):
+#     total_loss = 0.0
 
-        if(DEBUG):
-            print(i,' out of ',len(target_words), end='\r')
+#     iter_num = 0
 
-        if(i + batch_size > len(train_examples)):
-            context_words = train_examples[i:,:]
-            center_word = target_words[i:]
-        else:
-            context_words = train_examples[i:i+batch_size,:]
-            center_word = target_words[i:i+batch_size]
+#     start = time.time()
 
-        input_ = context_words
-        output_ = Variable(center_word)
+#     for i in range(0, len(target_words), batch_size):
 
-        optimizer.zero_grad()
+#         if(DEBUG):
+#             print(i,' out of ',len(target_words), end='\r')
 
-        # Forward
-        outputs = model(input_)
+#         if(i + batch_size > len(train_examples)):
+#             context_words = train_examples[i:,:]
+#             center_word = target_words[i:]
+#         else:
+#             context_words = train_examples[i:i+batch_size,:]
+#             center_word = target_words[i:i+batch_size]
 
-        # Backward
-        loss = criterion(outputs, output_)
-        loss.backward()
+#         input_ = context_words
+#         output_ = Variable(center_word)
 
-        # Optimize
-        optimizer.step()
+#         optimizer.zero_grad()
 
-        total_loss += loss.item()
+#         # Forward
+#         outputs = model(input_)
 
-        if iter_num % DEBUG_ITERS == DEBUG_ITERS-1:
-            log(total_loss)
-            total_loss = 0.0
-            torch.save(model.state_dict(), model_name)
+#         # Backward
+#         loss = criterion(outputs, output_)
+#         loss.backward()
 
-        iter_num = (iter_num + 1) % DEBUG_ITERS
+#         # Optimize
+#         optimizer.step()
 
+#         total_loss += loss.item()
+
+#         if iter_num % DEBUG_ITERS == DEBUG_ITERS-1:
+#             log(total_loss)
+#             total_loss = 0.0
+#             torch.save(model.state_dict(), model_name)
+
+#         iter_num = (iter_num + 1) % DEBUG_ITERS
+
+#     end = time.time()
+
+#     log('Epoch Took ' + str((end-start)/3600))
+
+# log('All Took ' + str((time.time()-start_epoch)/3600))
