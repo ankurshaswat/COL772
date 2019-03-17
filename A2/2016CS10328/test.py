@@ -12,13 +12,13 @@ from scipy.stats import rankdata
 
 BATCH_SIZE = 1
 
-cuda_available = torch.cuda.is_available()
-cuda_device = -1
+# cuda_available = torch.cuda.is_available()
+# cuda_device = -1
 
-if cuda_available:
-    print("Cuda availalbe")
-    cuda_device = torch.cuda.current_device()
-    print("CUDA device = ",cuda_device)
+# if cuda_available:
+#     print("Cuda availalbe")
+#     cuda_device = torch.cuda.current_device()
+#     print("CUDA device = ", cuda_device)
 
 eval_data = sys.argv[1]
 eval_data_td = sys.argv[2]
@@ -47,6 +47,7 @@ def load_google_model(fp):
     return model
 
 # google_model = load_google_model(google_path)
+
 
 def get_sentence(fp):
     window_tokens = []
@@ -126,10 +127,9 @@ def get_sentence_with_google(fp):
                     idx = word2idx['-UNK-']
                     in_model_row.append(True)
                     tokens.append(idx)
-        tokens = list(map(torch.as_tensor,tokens))
+        tokens = list(map(torch.as_tensor, tokens))
         window_tokens.append(tokens)
         in_model.append(in_model_row)
-
 
     return in_model, window_tokens
 
@@ -154,29 +154,39 @@ tokens = torch.as_tensor(tokens)
 # in_model, tokens = get_sentence_with_google(eval_data)
 word_options = get_options(eval_data_td)
 
-if cuda_available:
-    tokens = tokens.to(cuda_device)
-    model = model.to(cuda_device)
+# if cuda_available:
+    # tokens = tokens.to(cuda_device)
+    # model = model.to(cuda_device)
 
 ranks = []
 
-for i in range(0,len(tokens),BATCH_SIZE):
-    print(i, ' out of ', len(tokens), end='\r')
-    if(i + BATCH_SIZE > len(tokens)):
-        batch = tokens[i:,:]
-    else:
-        batch = tokens[i:i+BATCH_SIZE,:]
+data_size = len(tokens)
+
+for i in range(0, data_size):
+
+    batch = [tokens[i]]
+
+    # if(i + BATCH_SIZE > data_size):
+    #     batch = tokens[i:, :]
+    #     limit = data_size
+    # else:
+    #     batch = tokens[i:i+BATCH_SIZE, :]
+    #     limit = i+BATCH_SIZE
     input_ = torch.as_tensor(batch)
     output_ = model(input_)
     # output_ = model.cust_forward(in_model[i], tokens[i])
     log_softmax = F.log_softmax(output_, dim=0)
-    for j in range(i,min(i+BATCH_SIZE,len(tokens))):
-        word_probs = []
-        for word in word_options[j]:
-            if word in word2idx:
-                idx = word2idx[word]
-            else:
-                idx = word2idx['-UNK-']
-            word_probs.append(-1*log_softmax[j%BATCH_SIZE][idx])
-        ranks.append(rankdata(word_probs, method='ordinal'))
+    # for j in range(i, limit):
+    print(i, ' out of ', data_size, end='\r')
+    word_probs = []
+        # loc_word_options = word_options[j]
+        # probs = log_softmax[j % BATCH_SIZE]
+    for word in word_options[i]:
+        if word in word2idx:
+            idx = word2idx[word]
+        else:
+            idx = word2idx['-UNK-']
+        # word_probs.append(-1*probs[idx])
+        word_probs.append(-1*log_softmax[idx])
+    ranks.append(rankdata(word_probs, method='ordinal'))
 write_results(output_path, ranks)
