@@ -109,3 +109,4 @@ A2/dataset
 *.pkl
 *.pt
 A2/test_dataset
+A2/2016CS10328/output.txt
