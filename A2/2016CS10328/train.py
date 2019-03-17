@@ -26,7 +26,7 @@ cuda_device = -1
 if cuda_available:
     print("Cuda availalbe")
     cuda_device = torch.cuda.current_device()
-    print("CUDA device = ",cuda_device)
+    print("CUDA device = ", cuda_device)
 
 dataset_path = sys.argv[1]
 
@@ -39,6 +39,7 @@ embeddings_path = sys.argv[3]
 embedding_dimension = 300
 vocab_size = 0
 counts = {}
+
 
 def log(s):
     if DEBUG:
@@ -183,13 +184,13 @@ for epoch in range(EPOCHS):
     for i in range(0, len(target_words), BATCH_SIZE):
 
         if(DEBUG):
-            print(i,' out of ',len(target_words), end='\r')
+            print(i, ' out of ', len(target_words), end='\r')
 
         if(i + BATCH_SIZE > len(train_examples)):
-            context_words = train_examples[i:,:]
+            context_words = train_examples[i:, :]
             center_word = target_words[i:]
         else:
-            context_words = train_examples[i:i+BATCH_SIZE,:]
+            context_words = train_examples[i:i+BATCH_SIZE, :]
             center_word = target_words[i:i+BATCH_SIZE]
 
         input_ = context_words

@@ -29,7 +29,7 @@ class Net(nn.Module):
         x = self.linear1(x)
         return x
 
-    def cust_forward(self,in_model,embeds):
+    def cust_forward(self, in_model, embeds):
         sum_ = torch.zeros(self.embedding_dimension)
         for i in range(len(in_model)):
             if(in_model[i]):
