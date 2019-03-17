@@ -18,9 +18,7 @@ class Net(nn.Module):
         self.linear1.weight.requires_grad = True
 
     def set_weights(self, initial_embeds):
-        # self.embed1.weight = nn.Parameter(initial_embeds)
         self.embed1.weight.data.copy_(initial_embeds)
-        # self.linear1.weight = nn.Parameter(initial_embeds)
         self.linear1.weight.data.copy_(initial_embeds)
 
     def forward(self, x):

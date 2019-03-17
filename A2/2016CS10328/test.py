@@ -12,22 +12,20 @@ from scipy.stats import rankdata
 
 eval_data = sys.argv[1]
 eval_data_td = sys.argv[2]
+model_path = sys.argv[2]
+google_path = sys.argv[4]
 output_path = 'output.txt'
 
-dbfile = open(sys.argv[3] + '/wordIndexes.pkl', 'rb')
-db = pickle.load(dbfile)
+restored_dict = torch.load(sys.argv[3])
 
-google_path = sys.argv[4]
+vocab_size = restored_dict['vocab_size']
+embedding_dimension = restored_dict['embedding_dimension']
+word2idx = restored_dict['word2idx']
+idx2word = restored_dict['idx2word']
+model_params = restored_dict['model']
 
-word2idx = db['word2idx']
-idx2word = db['idx2word']
-vocab_size = db['vocab_size']
-embedding_dimension = db['embedding_dimension']
-
-dbfile.close()
-
-model = Net(vocab_size, embedding_dimension)
-model.load_state_dict(torch.load(sys.argv[3] + '/model.pt'))
+model = Net(vocab_size.embedding_dimension)
+model.load_state_dict(model_params)
 model.eval()
 
 

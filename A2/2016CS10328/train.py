@@ -17,26 +17,21 @@ from torch.autograd import Variable
 
 DEBUG = True
 DEBUG_ITERS = 100
-EPOCHS = 50
+EPOCHS = 6
 BATCH_SIZE = 256
 
 cuda_available = torch.cuda.is_available()
 cuda_device = -1
 
 if cuda_available:
-    print("Cuda availalbe")
     cuda_device = torch.cuda.current_device()
-    print("CUDA device = ", cuda_device)
+    print("CUDA Available. Using device number ", cuda_device)
 
 dataset_path = sys.argv[1]
-
-pickle_file_name = sys.argv[2] + '/wordIndexes.pkl'
-model_name = sys.argv[2] + '/model.pt'
-
+model_path = sys.argv[2]
 embeddings_path = sys.argv[3]
-# evaluation_file_path = sys.argv[4]
+evaluation_file_path = sys.argv[4]
 
-embedding_dimension = 300
 vocab_size = 0
 counts = {}
 
@@ -51,6 +46,8 @@ def load():
 
     model = gensim.models.KeyedVectors.load_word2vec_format(
         embeddings_path, binary=True)
+
+    embedding_dimension = model['run'].shape[0]
 
     log('Generating Vocab')
     word2idx = {}
@@ -152,39 +149,18 @@ if cuda_available:
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 criterion = nn.CrossEntropyLoss()
 
-log('Saving Vocab mappings')
-db = {}
+log("Saving torch model")
 
-db['word2idx'] = word2idx
-db['idx2word'] = idx2word
-db['embedding_dimension'] = embedding_dimension
-db['vocab_size'] = vocab_size
+log(str(len(train_examples)) + ' training examples in total')
 
-dbfile = open(pickle_file_name, 'wb')
-
-pickle.dump(db, dbfile)
-dbfile.close()
-
-log(str(len(train_examples)) + ' training examples in one epoch')
-
-torch.save(model.state_dict(), model_name)
-
-log('Training')
+log('Starting Training')
 
 start_epoch = time.time()
 
 for epoch in range(EPOCHS):
-
     total_loss = 0.0
-
-    iter_num = 0
-
     start = time.time()
-
     for i in range(0, len(target_words), BATCH_SIZE):
-
-        if(DEBUG):
-            print(i, ' out of ', len(target_words), end='\r')
 
         if(i + BATCH_SIZE > len(train_examples)):
             context_words = train_examples[i:, :]
@@ -209,16 +185,10 @@ for epoch in range(EPOCHS):
         optimizer.step()
 
         total_loss += loss.item()
-
-        if iter_num % DEBUG_ITERS == DEBUG_ITERS-1:
-            log(total_loss)
-            total_loss = 0.0
-            torch.save(model.state_dict(), model_name)
-
-        iter_num = (iter_num + 1) % DEBUG_ITERS
-
     end = time.time()
 
-    log('Epoch Took ' + str((end-start)/3600))
+    log('Epoch Took ' + str((end-start)/3600) + ". Loss = "+str(total_loss))
+    torch.save({'model': model.state_dict(), 'word2idx': word2idx, 'vocab_size': vocab_size,
+                'embedding_dimension': embedding_dimension, 'idx2word': idx2word}, model_path)
 
 log('All Took ' + str((time.time()-start_epoch)/3600))
