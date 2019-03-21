@@ -2,7 +2,7 @@ import torch
 import gensim
 import pickle
 import sys
-import time
+#import time
 
 import numpy as np
 import torch.nn as nn
@@ -12,12 +12,12 @@ import torch.nn.functional as F
 from model import Net, window_size
 from os import listdir
 from nltk import word_tokenize, pos_tag
-from tqdm import tqdm as tqdm
+#from tqdm import tqdm as tqdm
 from torch.autograd import Variable
 
 DEBUG = True
 DEBUG_ITERS = 100
-EPOCHS = 6
+EPOCHS = 5
 BATCH_SIZE = 256
 
 cuda_available = torch.cuda.is_available()
@@ -31,6 +31,7 @@ dataset_path = sys.argv[1]
 model_path = sys.argv[2]
 embeddings_path = sys.argv[3]
 evaluation_file_path = sys.argv[4]
+evaluation_td_file_path = sys.argv[5]
 
 vocab_size = 0
 counts = {}
@@ -68,7 +69,7 @@ def load():
             data_tokenized.append(word_tokenize(file.read()))
 
     log("Replacing proper nouns")
-    for i in tqdm(range(len(data_tokenized))):
+    for i in range(len(data_tokenized)):
         token_set = data_tokenized[i]
         datum_pos_tagged = pos_tag(token_set)
         for j in range(len(datum_pos_tagged)):
@@ -112,7 +113,7 @@ def load():
     log("Creating Training Examples")
     train_examples = []
     target_words = []
-    for i in tqdm(range(len(data_tokenized))):
+    for i in range(len(data_tokenized)):
         for j in range(len(data_tokenized[i])):
             context = []
             target_word = word2idx[data_tokenized[i][j]]
@@ -155,11 +156,11 @@ log(str(len(train_examples)) + ' training examples in total')
 
 log('Starting Training')
 
-start_epoch = time.time()
+#start_epoch = time.time()
 
 for epoch in range(EPOCHS):
     total_loss = 0.0
-    start = time.time()
+    #start = time.time()
     for i in range(0, len(target_words), BATCH_SIZE):
 
         if(i + BATCH_SIZE > len(train_examples)):
@@ -185,10 +186,10 @@ for epoch in range(EPOCHS):
         optimizer.step()
 
         total_loss += loss.item()
-    end = time.time()
+    #end = time.time()
 
-    log('Epoch Took ' + str((end-start)/3600) + ". Loss = "+str(total_loss))
+    #log('Epoch Took ' + str((end-start)/3600) + ". Loss = "+str(total_loss))
     torch.save({'model': model.state_dict(), 'word2idx': word2idx, 'vocab_size': vocab_size,
                 'embedding_dimension': embedding_dimension, 'idx2word': idx2word}, model_path)
 
-log('All Took ' + str((time.time()-start_epoch)/3600))
+#log('All Took ' + str((time.time()-start_epoch)/3600))

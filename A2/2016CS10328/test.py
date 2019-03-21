@@ -12,11 +12,11 @@ from scipy.stats import rankdata
 
 eval_data = sys.argv[1]
 eval_data_td = sys.argv[2]
-model_path = sys.argv[2]
+model_path = sys.argv[3]
 google_path = sys.argv[4]
 output_path = 'output.txt'
 
-restored_dict = torch.load(sys.argv[3])
+restored_dict = torch.load(model_path)
 
 vocab_size = restored_dict['vocab_size']
 embedding_dimension = restored_dict['embedding_dimension']
@@ -24,7 +24,7 @@ word2idx = restored_dict['word2idx']
 idx2word = restored_dict['idx2word']
 model_params = restored_dict['model']
 
-model = Net(vocab_size.embedding_dimension)
+model = Net(vocab_size,embedding_dimension)
 model.load_state_dict(model_params)
 model.eval()
 
@@ -85,13 +85,14 @@ ranks = []
 data_size = len(tokens)
 
 for i in range(0, data_size):
-    print(i, ' out of ', data_size, end='\r')
+    # print(i, ' out of ', data_size, end='\r')
 
     input_ = torch.as_tensor([tokens[i]])
 
-    output_ = model(input_).view(-1)
+    output_ = model(input_)[0]
+    # output_ = output_.view(-1)
 
-    log_softmax = F.log_softmax(output_, dim=0)
+    # log_softmax = F.log_softmax(output_, dim=0)
 
     word_probs = []
 
@@ -102,10 +103,9 @@ for i in range(0, data_size):
         else:
             idx = word2idx['-UNK-']
 
-        word_probs.append(-1*log_softmax[idx])
+        # word_probs.append(-1*log_softmax[idx])
+        word_probs.append(-1*output_[idx])
 
     ranks.append(rankdata(word_probs, method='ordinal'))
 
-    # if i==0:
-    #     print(ranks[0])
 write_results(output_path, ranks)

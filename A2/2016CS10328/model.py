@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-window_size = 3
+window_size = 1
 
 
 class Net(nn.Module):
